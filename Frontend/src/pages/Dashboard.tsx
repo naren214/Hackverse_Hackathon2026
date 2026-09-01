@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
         
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-spidey-blue mb-2">
               Dashboard
             </h1>
             <p className="text-t-muted text-sm md:text-base">

@@ -52,7 +52,7 @@ export const Sidebar: React.FC = () => {
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="ml-3 font-bold text-xl tracking-wide bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+            className="ml-3 font-bold text-xl tracking-wide bg-gradient-to-r from-red-500 to-spidey-blue bg-clip-text text-transparent"
           >
             StructureAI
           </motion.span>
@@ -107,7 +107,7 @@ export const Sidebar: React.FC = () => {
 
       <div className="mt-auto p-4 border-t border-t-border">
         <div className={clsx("flex items-center", isCollapsed ? "justify-center" : "px-2")}>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shrink-0 border border-t-border shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600 to-spidey-blue flex items-center justify-center shrink-0 border border-t-border shadow-[0_0_10px_rgba(239,68,68,0.5)]">
             <span className="font-bold text-white text-sm">NA</span>
           </div>
           {!isCollapsed && (

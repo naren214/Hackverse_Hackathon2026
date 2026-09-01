@@ -6,17 +6,21 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444', // Spidey Red
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          950: '#450a0a',
+        },
+        'spidey-blue': {
+          DEFAULT: '#3b82f6',
+          dark: '#1d4ed8',
         },
         dark: {
           900: '#0F1117',
@@ -49,8 +53,8 @@ export default {
       },
       keyframes: {
         pulseGlow: {
-          '0%, 100%': { opacity: 1, boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)' },
-          '50%': { opacity: .5, boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' },
+          '0%, 100%': { opacity: 1, boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)' },
+          '50%': { opacity: .5, boxShadow: '0 0 20px rgba(239, 68, 68, 0.8)' },
         },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: 0 },
@@ -69,7 +73,7 @@ export default {
         'card': 'var(--shadow-card)',
         'card-hover': 'var(--shadow-card-hover)',
         'glow': 'var(--shadow-glow)',
-        'glow-primary': '0 0 15px -3px rgba(59, 130, 246, 0.4)',
+        'glow-primary': '0 0 15px -3px rgba(239, 68, 68, 0.4)',
         'glow-success': '0 0 15px -3px rgba(34, 197, 94, 0.4)',
         'glow-warning': '0 0 15px -3px rgba(245, 158, 11, 0.4)',
         'glow-danger': '0 0 15px -3px rgba(239, 68, 68, 0.4)',

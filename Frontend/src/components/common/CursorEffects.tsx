@@ -47,7 +47,7 @@ export const CursorEffects: React.FC = () => {
     <>
       {/* Target Cursor */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed top-0 left-0 pointer-events-none z-[9999]"
         animate={{
           x: mousePos.x - 16,
           y: mousePos.y - 16,
@@ -60,7 +60,7 @@ export const CursorEffects: React.FC = () => {
       >
         <div className="relative w-8 h-8 flex items-center justify-center">
           <motion.div 
-            className="w-1.5 h-1.5 bg-white rounded-full absolute"
+            className="w-1.5 h-1.5 bg-red-500 rounded-full absolute"
             animate={{ opacity: isHoveringTarget ? 0 : 1 }}
             transition={{ duration: 0.2 }}
           />
@@ -73,10 +73,10 @@ export const CursorEffects: React.FC = () => {
             }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
-            <div className="absolute top-0 left-0 w-2 h-2 border-t-[1.5px] border-l-[1.5px] border-white rounded-tl-sm" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t-[1.5px] border-r-[1.5px] border-white rounded-tr-sm" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b-[1.5px] border-l-[1.5px] border-white rounded-bl-sm" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-[1.5px] border-r-[1.5px] border-white rounded-br-sm" />
+            <div className="absolute top-0 left-0 w-2 h-2 border-t-[1.5px] border-l-[1.5px] border-red-500 rounded-tl-sm" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t-[1.5px] border-r-[1.5px] border-red-500 rounded-tr-sm" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b-[1.5px] border-l-[1.5px] border-red-500 rounded-bl-sm" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b-[1.5px] border-r-[1.5px] border-red-500 rounded-br-sm" />
           </motion.div>
         </div>
       </motion.div>
@@ -96,7 +96,7 @@ export const CursorEffects: React.FC = () => {
                 style={{ 
                   height: 2,
                   width: 14,
-                  backgroundColor: '#60A5FA', // blue-400
+                  backgroundColor: i % 2 === 0 ? '#EF4444' : '#3B82F6', // Alternate Spidey Red and Blue
                   transform: `rotate(${(i * 360) / 8}deg)`,
                   marginTop: -1,
                 }}

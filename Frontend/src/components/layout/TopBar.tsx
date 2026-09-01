@@ -91,7 +91,7 @@ export const TopBar: React.FC = () => {
         <div className="relative">
           <button 
             onClick={() => setShowProfile(!showProfile)}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 hover:ring-offset-t-bg transition-all"
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-red-600 to-spidey-blue hover:ring-2 hover:ring-red-500 hover:ring-offset-2 hover:ring-offset-t-bg transition-all"
           >
             <span className="text-xs font-bold text-white">GOV</span>
           </button>

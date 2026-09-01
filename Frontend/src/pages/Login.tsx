@@ -77,7 +77,7 @@ export const Login: React.FC = () => {
 
         <div className="relative">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+            <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-spidey-blue rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
               <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-t-text tracking-tight">StructureAI</h1>

@@ -21,14 +21,14 @@
     --color-scrollbar-thumb: #CBD5E1;
     --color-scrollbar-hover: #94A3B8;
     --color-chart-tooltip: #FFFFFF;
-    --color-chart-cursor: rgba(59, 130, 246, 0.08);
+    --color-chart-cursor: rgba(239, 68, 68, 0.08);
     --color-skeleton: #E2E8F0;
     --color-skeleton-shine: #F1F5F9;
     --leaflet-filter: none;
     --leaflet-bg: #F8FAFC;
     --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
     --shadow-card-hover: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.08);
-    --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.1);
+    --shadow-glow: 0 0 15px rgba(239, 68, 68, 0.1);
   }
 
   /* Dark theme */
@@ -56,7 +56,7 @@
     --leaflet-bg: #0F1117;
     --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-card-hover: 0 10px 25px -5px rgba(0,0,0,0.4);
-    --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.15);
+    --shadow-glow: 0 0 15px rgba(239, 68, 68, 0.15);
   }
 }
 
