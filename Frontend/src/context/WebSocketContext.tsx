@@ -51,7 +51,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const { io } = await import('socket.io-client');
         if (cleanup) return;
 
-        socket = io('http://localhost:5001', {
+        // Derive WS URL from API URL if set, otherwise use localhost
+        const wsUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5001';
+        socket = io(wsUrl, {
           auth: { token: getToken() },
           transports: ['websocket', 'polling']
         });

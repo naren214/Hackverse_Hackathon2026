@@ -1,7 +1,7 @@
 import { apiClient, getToken } from './client';
 import { Structure } from '../types/structure.types';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export const structuresApi = {
   getStructures: (params?: { type?: string; status?: string; city?: string; search?: string }): Promise<Structure[]> => {

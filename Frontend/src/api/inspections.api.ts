@@ -1,7 +1,7 @@
 import { apiClient, getToken } from './client';
 import { Inspection } from '../types/common.types';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 export const inspectionsApi = {
   getInspections: (query = '') => apiClient.get<Inspection[]>(`/inspections${query}`),
