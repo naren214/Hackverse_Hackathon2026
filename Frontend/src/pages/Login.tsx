@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Button } from '../components/common/Button';
+import { useAuth } from '../hooks/useAuth';
+import { toast } from 'sonner';
 
 export const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,20 +12,24 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent, loginEmail?: string, loginPassword?: string) => {
     e?.preventDefault();
     setIsLoading(true);
-    // Mock login delay
-    setTimeout(() => {
+    try {
+      await login(loginEmail || email, loginPassword || password);
       navigate('/dashboard');
-    }, 1000);
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed');
+      setIsLoading(false);
+    }
   };
 
   const handleDemoAccess = () => {
     setEmail('demo@structureai.com');
     setPassword('demo1234');
-    handleLogin();
+    handleLogin(undefined, 'demo@structureai.com', 'demo1234');
   };
 
   // Generate particles
@@ -136,6 +142,16 @@ export const Login: React.FC = () => {
                 disabled={isLoading}
               >
                 Demo Access
+              </Button>
+              
+              <Button 
+                type="button" 
+                variant="secondary" 
+                fullWidth 
+                onClick={() => navigate('/public')}
+                disabled={isLoading}
+              >
+                Public Portal
               </Button>
             </div>
           </form>

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '../common/Card';
 import { BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { mockStructures } from '../../utils/mockData';
+import { structuresApi } from '../../api/structures.api';
+import { Structure } from '../../types/structure.types';
 
 const getHealthColor = (score: number) => {
   if (score >= 80) return '#22C55E';
@@ -29,16 +30,27 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const HealthOverview: React.FC = () => {
-  const data = [...mockStructures]
-    .sort((a, b) => b.healthScore - a.healthScore)
-    .slice(0, 8); // top 8
+export const HealthOverview: React.FC = () => {
+  const [structures, setStructures] = useState<Structure[]>([]);
+
+  useEffect(() => {
+    structuresApi.getStructures()
+      .then(data => setStructures(data))
+      .catch(err => console.error('Failed to load structures:', err));
+  }, []);
+
+  const data = useMemo(() => {
+    return [...structures]
+      .sort((a, b) => b.healthScore - a.healthScore)
+      .slice(0, 8); // top 8
+  }, [structures]);
 
   return (
     <Card 
       title="Structure Health Ranking" 
       icon={BarChartIcon}
       className="h-[400px]"
+      headerAction={<span className="text-xs text-t-muted bg-t-hover px-2 py-1 rounded">Current</span>}
     >
       <div className="w-full h-full pt-2 pb-4">
         <ResponsiveContainer width="100%" height="100%">
@@ -62,6 +74,3 @@ const HealthOverview: React.FC = () => {
     </Card>
   );
 };
-
-export { HealthOverview };
-export default HealthOverview;

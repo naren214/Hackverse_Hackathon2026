@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Building2, Activity, AlertTriangle, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { mockStructures, mockSensors, mockAlerts } from '../../utils/mockData';
+import { analyticsApi } from '../../api/analytics.api';
 import { StatCard } from '../common/StatCard';
 
-const KPIBar: React.FC = () => {
-  const totalStructures = mockStructures.length;
-  const activeSensors = mockSensors.filter((s) => s.status === 'online').length;
-  const criticalAlerts = mockAlerts.filter((a) => a.severity === 'critical').length;
-  const avgHealth = Math.round(
-    mockStructures.reduce((acc, curr) => acc + curr.healthScore, 0) / totalStructures
-  );
+const KPIBar: React.FC<{ timeRange?: string }> = ({ timeRange = '6m' }) => {
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    analyticsApi.getDashboardStats(timeRange)
+      .then(data => setStats(data))
+      .catch(err => console.error('Failed to load dashboard stats:', err));
+  }, [timeRange]);
+
+  const totalStructures = stats?.totalStructures || 0;
+  const activeSensors = stats?.activeSensors || 0;
+  const criticalAlerts = stats?.criticalAlerts || 0;
+  const avgHealth = stats?.avgHealth || 0;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -65,6 +71,11 @@ const KPIBar: React.FC = () => {
           value={criticalAlerts}
           icon={AlertTriangle}
           trend={{ value: 1, isPositive: false }}
+          secondaryStat={
+            <span className="text-t-muted">
+              <span className="text-[#F59E0B] font-medium">{stats?.warningAlerts || 0}</span> warnings
+            </span>
+          }
           color="red"
           sparklineData={sparklineData3}
         />

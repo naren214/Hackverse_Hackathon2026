@@ -1,9 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { mockAnomalies } from '../../utils/mockData';
+import { analyticsApi } from '../../api/analytics.api';
+import { AnomalyPoint } from '../../types/analytics.types';
+import { useTimeRange } from '../../context/TimeRangeContext';
 
 export const AnomalyTimeline: React.FC = () => {
+  const [anomalies, setAnomalies] = useState<AnomalyPoint[]>([]);
+  const { timeRange } = useTimeRange();
+
+  useEffect(() => {
+    analyticsApi.getAnomalies(timeRange)
+      .then(data => setAnomalies(data))
+      .catch(err => console.error('Failed to load anomalies:', err));
+  }, [timeRange]);
+  const chartData = anomalies.map(a => ({
+    ...a,
+    formattedDate: new Date(a.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+    deviation: Math.abs(a.value - a.expected)
+  }));
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -13,14 +29,16 @@ export const AnomalyTimeline: React.FC = () => {
           <p className="text-t-muted text-sm mb-2">{data.sensorName}</p>
           <div className="flex justify-between text-sm">
             <span className="text-t-muted">Deviation:</span>
-            <span className="text-t-text ml-4">{(data.value - data.expected).toFixed(2)}</span>
+            <span className="text-t-text ml-4">{data.deviation.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm mt-1">
             <span className="text-t-muted">Severity:</span>
             <span className={`ml-4 capitalize ${
-              data.severity === 'high' ? 'text-red-400' :
-              data.severity === 'medium' ? 'text-amber-400' : 'text-yellow-400'
-            }`}>{data.severity}</span>
+              data.severity === 'high' ? 'text-red-500' :
+              data.severity === 'medium' ? 'text-amber-500' : 'text-blue-500'
+            }`}>
+              {data.severity}
+            </span>
           </div>
         </div>
       );
@@ -28,50 +46,43 @@ export const AnomalyTimeline: React.FC = () => {
     return null;
   };
 
-  // Convert dates to timestamps for the X axis
-  const chartData = mockAnomalies.map(a => ({
-    ...a,
-    timestamp: new Date(a.date).getTime(),
-    deviation: Math.abs(a.value - a.expected)
-  }));
-
   return (
     <div className="bg-t-card border border-t-border rounded-xl p-6 h-full flex flex-col">
       <div className="flex items-center space-x-2 mb-6">
-        <div className="p-2 bg-amber-500/10 rounded-lg">
-          <Zap size={20} className="text-amber-500" />
+        <div className="p-2 bg-yellow-500/10 rounded-lg">
+          <Zap size={20} className="text-yellow-500" />
         </div>
-        <h2 className="text-lg font-semibold text-t-text">Anomaly Detection</h2>
+        <h2 className="text-lg font-semibold text-t-text">Anomaly Timeline</h2>
       </div>
 
       <div className="flex-1 w-full min-h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
             <XAxis 
-              dataKey="timestamp" 
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={(tick) => new Date(tick).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              type="category" 
+              dataKey="formattedDate" 
+              name="Date" 
               stroke="#94A3B8" 
               fontSize={12} 
               tickLine={false} 
               axisLine={false} 
             />
             <YAxis 
-              dataKey="deviation" 
-              name="Deviation"
+              type="number" 
+              dataKey="value" 
+              name="Value" 
               stroke="#94A3B8" 
               fontSize={12} 
               tickLine={false} 
               axisLine={false} 
             />
-            <ZAxis dataKey="deviation" range={[50, 400]} />
+            <ZAxis type="number" dataKey="deviation" range={[50, 400]} name="Deviation" />
             <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
             
-            <Scatter name="High" data={chartData.filter(d => d.severity === 'high')} fill="#EF4444" opacity={0.8} />
-            <Scatter name="Medium" data={chartData.filter(d => d.severity === 'medium')} fill="#F59E0B" opacity={0.8} />
-            <Scatter name="Low" data={chartData.filter(d => d.severity === 'low')} fill="#FDE047" opacity={0.8} />
+            <Scatter name="High" data={chartData.filter(a => a.severity === 'high')} fill="#EF4444" opacity={0.8} />
+            <Scatter name="Medium" data={chartData.filter(a => a.severity === 'medium')} fill="#F59E0B" opacity={0.8} />
+            <Scatter name="Low" data={chartData.filter(a => a.severity === 'low')} fill="#3B82F6" opacity={0.8} />
           </ScatterChart>
         </ResponsiveContainer>
       </div>

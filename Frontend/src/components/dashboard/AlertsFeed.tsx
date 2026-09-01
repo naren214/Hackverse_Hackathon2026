@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../common/Card';
 import { Bell, AlertTriangle, AlertCircle, Info } from 'lucide-react';
-import { mockAlerts } from '../../utils/mockData';
+import { alertsApi } from '../../api/alerts.api';
+import { Alert } from '../../types/alert.types';
 import { formatRelativeTime } from '../../utils/formatters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const AlertsFeed: React.FC = () => {
-  const alerts = mockAlerts.slice(0, 8); // top 8
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+    alertsApi.getAlerts()
+      .then(data => setAlerts(data.slice(0, 8)))
+      .catch(err => console.error('Failed to load alerts:', err));
+  }, []);
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {

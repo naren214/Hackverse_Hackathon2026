@@ -1,9 +1,10 @@
-import React, { createContext, useState } from 'react';
-import { AuthState } from '../types/auth.types';
-import { mockUser } from '../utils/mockData';
+import React, { createContext, useState, useEffect } from 'react';
+import { AuthState, User } from '../types/auth.types';
+import { authApi } from '../api/auth.api';
+import { getToken } from '../api/client';
 
 interface AuthContextType extends AuthState {
-  login: (email: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -11,23 +12,44 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({
-    user: mockUser,
-    isAuthenticated: true,
-    isLoading: false,
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
   });
 
-  const login = async (email: string) => {
+  // Check for existing token on mount
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      authApi.me()
+        .then((user: User) => {
+          setState({ user, isAuthenticated: true, isLoading: false });
+        })
+        .catch(() => {
+          setState({ user: null, isAuthenticated: false, isLoading: false });
+        });
+    } else {
+      setState(s => ({ ...s, isLoading: false }));
+    }
+  }, []);
+
+  const login = async (email: string, password: string) => {
     setState(s => ({ ...s, isLoading: true }));
-    setTimeout(() => {
+    try {
+      const data = await authApi.login(email, password);
       setState({
-        user: { ...mockUser, email },
+        user: data.user,
         isAuthenticated: true,
         isLoading: false
       });
-    }, 1000);
+    } catch (error) {
+      setState({ user: null, isAuthenticated: false, isLoading: false });
+      throw error;
+    }
   };
 
   const logout = () => {
+    authApi.logout().catch(() => {});
     setState({
       user: null,
       isAuthenticated: false,

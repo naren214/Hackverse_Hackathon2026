@@ -3,13 +3,24 @@ import { Card } from '../common/Card';
 import { Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const generateMockData = () => {
+const generateMockData = (range: string) => {
   const data = [];
   const now = new Date();
-  for (let i = 24; i >= 0; i--) {
-    const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+  const count = range === '1H' ? 60 : range === '24H' ? 24 : range === '7D' ? 7 : 30;
+
+  for (let i = count; i >= 0; i--) {
+    let time = new Date();
+    if (range === '1H') time = new Date(now.getTime() - i * 60 * 1000);
+    else if (range === '24H') time = new Date(now.getTime() - i * 60 * 60 * 1000);
+    else if (range === '7D') time = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    else time = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+
+    const timeStr = range === '1H' ? `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}` 
+                  : range === '24H' ? `${time.getHours()}:00` 
+                  : `${time.getDate()}/${time.getMonth()+1}`;
+
     data.push({
-      time: `${time.getHours()}:00`,
+      time: timeStr,
       vibration: 30 + Math.random() * 40 + (i === 5 ? 50 : 0),
       strain: 20 + Math.random() * 30,
       temperature: 45 + Math.random() * 15,
@@ -17,8 +28,6 @@ const generateMockData = () => {
   }
   return data;
 };
-
-const mockData = generateMockData();
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -41,6 +50,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const SensorActivityChart: React.FC = () => {
   const [range, setRange] = useState('24H');
   const ranges = ['1H', '24H', '7D', '30D'];
+  const mockData = React.useMemo(() => generateMockData(range), [range]);
 
   const headerAction = (
     <div className="flex bg-t-bg rounded-lg p-1 border border-t-border">

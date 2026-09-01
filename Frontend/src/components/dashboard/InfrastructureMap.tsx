@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import type { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Globe } from 'lucide-react';
-import { mockStructures } from '../../utils/mockData';
+import { structuresApi } from '../../api/structures.api';
+import { Structure } from '../../types/structure.types';
 import { Card } from '../common/Card';
 import { HealthGauge } from '../common/HealthGauge';
 import { Badge } from '../common/Badge';
@@ -36,6 +38,32 @@ const createCustomIcon = (status: string) => {
 };
 
 const InfrastructureMap: React.FC = () => {
+  const [structures, setStructures] = useState<Structure[]>([]);
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  useEffect(() => {
+    structuresApi.getStructures()
+      .then(data => setStructures(data))
+      .catch(err => console.error('Failed to load structures:', err));
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    };
+    
+    // Delayed resize to ensure layout settles after animation
+    const timer = setTimeout(handleResize, 300);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
+
   return (
     <Card 
       title="Infrastructure Map" 
@@ -43,18 +71,22 @@ const InfrastructureMap: React.FC = () => {
       className="h-[450px] flex flex-col"
       noPadding
     >
-      <div className="flex-1 relative rounded-b-xl overflow-hidden">
+      <div className="w-full h-full relative rounded-b-xl overflow-hidden">
         <MapContainer
+          ref={mapRef}
           center={[22.5, 78.5]}
           zoom={4.5}
-          className="w-full h-full bg-t-bg"
+          className="absolute inset-0 w-full h-full z-0 bg-t-bg"
           zoomControl={false}
+          whenReady={() => {
+            setTimeout(() => mapRef.current?.invalidateSize(), 0);
+          }}
         >
           <TileLayer
             url="https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           />
-          {mockStructures.map((struct) => (
+          {structures.map((struct) => (
             <Marker
               key={struct.id}
               position={[struct.location.lat, struct.location.lng]}

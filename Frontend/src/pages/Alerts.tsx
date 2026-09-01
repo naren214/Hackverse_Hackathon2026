@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { mockAlerts } from '../utils/mockData';
+import { alertsApi } from '../api/alerts.api';
 import { Alert } from '../types/alert.types';
 import { AlertList } from '../components/alerts/AlertList';
 import { AlertDetailDrawer } from '../components/alerts/AlertDetailDrawer';
@@ -9,7 +9,13 @@ import { SearchInput } from '../components/common/SearchInput';
 import { motion } from 'framer-motion';
 
 export const Alerts: React.FC = () => {
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  
+  useEffect(() => {
+    alertsApi.getAlerts()
+      .then(data => setAlerts(data))
+      .catch(err => console.error('Failed to load alerts:', err));
+  }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'critical' | 'warning' | 'info'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'acknowledged' | 'resolved'>('all');

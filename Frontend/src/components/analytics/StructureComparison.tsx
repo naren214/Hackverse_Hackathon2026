@@ -1,9 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GitCompare } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { mockStructures } from '../../utils/mockData';
+import { structuresApi } from '../../api/structures.api';
+import { Structure } from '../../types/structure.types';
 
 export const StructureComparison: React.FC = () => {
+  const [structures, setStructures] = useState<Structure[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    structuresApi.getStructures()
+      .then(data => {
+        setStructures(data);
+        if (data.length >= 2) {
+          setSelectedIds([data[0].id, data[1].id]);
+        }
+      })
+      .catch(err => console.error('Failed to load structures:', err));
+  }, []);
+
   // Generate deterministic synthetic metrics based on health score for demo
   const generateMetrics = (structure: any) => {
     const base = structure.healthScore;
@@ -15,8 +30,6 @@ export const StructureComparison: React.FC = () => {
       maintenance: Math.min(100, base - (structure.activeSensors % 5)),
     };
   };
-
-  const [selectedIds, setSelectedIds] = useState<string[]>([mockStructures[0].id, mockStructures[1].id]);
 
   const toggleStructure = (id: string) => {
     if (selectedIds.includes(id)) {
@@ -32,7 +45,7 @@ export const StructureComparison: React.FC = () => {
     }
   };
 
-  const selectedStructures = mockStructures.filter(s => selectedIds.includes(s.id));
+  const selectedStructures = structures.filter(s => selectedIds.includes(s.id));
   
   const chartData = [
     { subject: 'Structural Integrity', fullMark: 100 },
@@ -64,10 +77,11 @@ export const StructureComparison: React.FC = () => {
           </div>
           <h2 className="text-lg font-semibold text-t-text">Structure Comparison</h2>
         </div>
+        <span className="text-xs text-t-muted bg-t-hover px-2 py-1 rounded">Current</span>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        {mockStructures.slice(0, 5).map(s => (
+        {structures.slice(0, 5).map(s => (
           <button
             key={s.id}
             onClick={() => toggleStructure(s.id)}

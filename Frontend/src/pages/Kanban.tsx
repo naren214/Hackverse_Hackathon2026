@@ -1,18 +1,31 @@
-import React, { useState, useMemo } from 'react';
-import { mockKanbanTasks } from '../utils/mockData';
+import React, { useState, useMemo, useEffect } from 'react';
+import { kanbanApi } from '../api/kanban.api';
 import { KanbanTask, TaskStatus } from '../types/kanban.types';
 import { KanbanBoard } from '../components/kanban/KanbanBoard';
 import { StatCard } from '../components/common/StatCard';
 import { SearchInput } from '../components/common/SearchInput';
+import { TaskFormModal } from '../components/kanban/TaskFormModal';
 import { Plus, LayoutGrid, AlertTriangle, Activity, CheckCircle } from 'lucide-react';
 
 export const Kanban: React.FC = () => {
-  const [tasks, setTasks] = useState<KanbanTask[]>(mockKanbanTasks);
+  const [tasks, setTasks] = useState<KanbanTask[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  const handleTaskMove = (taskId: string, newStatus: TaskStatus) => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+  useEffect(() => {
+    kanbanApi.getTasks()
+      .then(data => setTasks(data))
+      .catch(err => console.error('Failed to load tasks:', err));
+  }, []);
+
+  const handleTaskMove = async (taskId: string, newStatus: TaskStatus) => {
+    try {
+      await kanbanApi.updateTask(taskId, { status: newStatus });
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    }
   };
 
   const stats = useMemo(() => {
@@ -41,11 +54,20 @@ export const Kanban: React.FC = () => {
           <h1 className="text-3xl font-bold text-t-text mb-1">Maintenance Board</h1>
           <p className="text-t-muted">Track and manage maintenance tasks</p>
         </div>
-        <button className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors">
+        <button 
+          onClick={() => setIsTaskModalOpen(true)}
+          className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors"
+        >
           <Plus size={18} />
           <span>Add Task</span>
         </button>
       </div>
+
+      <TaskFormModal 
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSuccess={(newTask) => setTasks(prev => [newTask, ...prev])}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Total Tasks" value={stats.total} icon={LayoutGrid} color="blue" />

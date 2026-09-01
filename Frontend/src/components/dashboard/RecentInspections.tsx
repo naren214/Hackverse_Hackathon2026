@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../common/Card';
 import { ClipboardCheck } from 'lucide-react';
-import { mockInspections } from '../../utils/mockData';
+import { apiClient } from '../../api/client';
+import { Inspection } from '../../types/common.types';
 import { formatDate } from '../../utils/formatters';
 import { Badge } from '../common/Badge';
 import { Link } from 'react-router-dom';
 
-const RecentInspections: React.FC = () => {
-  const inspections = mockInspections.slice(0, 5);
+const RecentInspections: React.FC<{ timeRange?: string }> = ({ timeRange }) => {
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+
+  useEffect(() => {
+    const query = timeRange ? `?timeRange=${timeRange}` : '';
+    apiClient.get<Inspection[]>(`/inspections${query}`)
+      .then(data => setInspections(data.slice(0, 5)))
+      .catch(err => console.error('Failed to load inspections:', err));
+  }, [timeRange]);
 
   const getComplianceVariant = (compliance: string) => {
     switch(compliance) {

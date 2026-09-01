@@ -4,11 +4,13 @@ import { Bell, User, LogOut, Settings as SettingsIcon } from 'lucide-react';
 import { SearchInput } from '../common/SearchInput';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
-const mockNotifications = [
-  { id: '1', title: 'Bridge A1 Anomaly', time: '2m ago' },
-  { id: '2', title: 'Sensor Offline', time: '1h ago' }
-];
+
+import { formatRelativeTime } from '../../utils/formatters';
+
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 export const TopBar: React.FC = () => {
   const location = useLocation();
@@ -16,6 +18,16 @@ export const TopBar: React.FC = () => {
   const [search, setSearch] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  
+  const { notifications } = useWebSocket();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    setShowProfile(false);
+  };
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-6 bg-t-bg/80 backdrop-blur-xl border-b border-t-border shrink-0 shadow-sm">
@@ -60,14 +72,17 @@ export const TopBar: React.FC = () => {
                 className="absolute right-0 mt-2 w-72 bg-t-card border border-t-border rounded-xl shadow-xl overflow-hidden"
               >
                 <div className="p-3 border-b border-t-border font-semibold text-t-text">Notifications</div>
-                <div className="max-h-64 overflow-y-auto">
-                  {mockNotifications.map(n => (
-                    <div key={n.id} className="p-3 hover:bg-t-hover cursor-pointer border-b border-t-border last:border-0 transition-colors">
-                      <p className="text-sm text-t-text">{n.title}</p>
-                      <p className="text-xs text-t-muted mt-1">{n.time}</p>
-                    </div>
-                  ))}
-                </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-t-muted text-sm">No new notifications</div>
+                  ) : (
+                    notifications.map(n => (
+                      <div key={n.id} className="p-4 hover:bg-t-hover transition-colors border-b border-t-border last:border-0 cursor-pointer">
+                        <p className="text-sm text-t-text font-medium">{n.title}</p>
+                        <p className="text-xs text-t-muted mt-1">{n.message}</p>
+                        <p className="text-xs text-t-muted mt-2">{formatRelativeTime(n.timestamp)}</p>
+                      </div>
+                    ))
+                  )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -96,7 +111,10 @@ export const TopBar: React.FC = () => {
                   <SettingsIcon className="w-4 h-4 mr-2" /> Settings
                 </button>
                 <div className="h-px bg-t-hover my-1" />
-                <button className="flex items-center w-full px-4 py-2 text-sm text-[#EF4444] hover:bg-[#EF4444]/10">
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-2 text-sm text-[#EF4444] hover:bg-[#EF4444]/10"
+                >
                   <LogOut className="w-4 h-4 mr-2" /> Logout
                 </button>
               </motion.div>

@@ -21,30 +21,61 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { useAuth } from './hooks/useAuth';
+import { Outlet } from 'react-router-dom';
+
+const ProtectedRoute = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <LoadingFallback />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <Outlet />;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <LoadingFallback />;
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
+const PublicLayout = React.lazy(() => import('./components/layout/PublicLayout').then(m => ({ default: m.PublicLayout })));
+const PublicDashboard = React.lazy(() => import('./pages/public/PublicDashboard').then(m => ({ default: m.PublicDashboard })));
+const PublicStructureDetail = React.lazy(() => import('./pages/public/PublicStructureDetail').then(m => ({ default: m.PublicStructureDetail })));
+
+import { TimeRangeProvider } from './context/TimeRangeContext';
+
 export default function App() {
   return (
-    <>
+    <TimeRangeProvider>
       <Toaster theme="dark" position="top-right" />
       <Suspense fallback={<LoadingFallback />}>
         <AnimatePresence mode="wait">
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Navigate to="/public" replace />} />
             
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/infrastructure" element={<Infrastructure />} />
-              <Route path="/infrastructure/:id" element={<InfrastructureDetail />} />
-              <Route path="/sensors" element={<Sensors />} />
-              <Route path="/alerts" element={<Alerts />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/kanban" element={<Kanban />} />
-              <Route path="/audit" element={<Audit />} />
-              <Route path="/settings" element={<Settings />} />
+            <Route path="/public" element={<PublicLayout />}>
+              <Route index element={<PublicDashboard />} />
+              <Route path="structures/:id" element={<PublicStructureDetail />} />
+            </Route>
+
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/infrastructure" element={<Infrastructure />} />
+                <Route path="/infrastructure/:id" element={<InfrastructureDetail />} />
+                <Route path="/sensors" element={<Sensors />} />
+                <Route path="/alerts" element={<Alerts />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/kanban" element={<Kanban />} />
+                <Route path="/audit" element={<Audit />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
             </Route>
           </Routes>
         </AnimatePresence>
       </Suspense>
-    </>
+    </TimeRangeProvider>
   );
 }

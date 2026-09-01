@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LayoutGrid, List as ListIcon, Activity, AlertTriangle, XCircle } from 'lucide-react';
 import { Sensor } from '../types/sensor.types';
-import { mockSensors } from '../utils/mockData';
+import { sensorsApi } from '../api/sensors.api';
 import { SensorGrid } from '../components/sensors/SensorGrid';
 import { SensorDetailModal } from '../components/sensors/SensorDetailModal';
 import { StatCard } from '../components/common/StatCard';
@@ -11,23 +11,30 @@ import { Badge } from '../components/common/Badge';
 import { SearchInput } from '../components/common/SearchInput';
 
 export const Sensors: React.FC = () => {
+  const [allSensors, setAllSensors] = useState<Sensor[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedSensor, setSelectedSensor] = useState<Sensor | null>(null);
 
-  const stats = useMemo(() => {
-    return {
-      total: mockSensors.length,
-      online: mockSensors.filter(s => s.status === 'online').length,
-      warning: mockSensors.filter(s => s.status === 'warning').length,
-      offline: mockSensors.filter(s => s.status === 'offline').length,
-    };
+  useEffect(() => {
+    sensorsApi.getSensors()
+      .then(data => setAllSensors(data))
+      .catch(err => console.error('Failed to load sensors:', err));
   }, []);
 
+  const stats = useMemo(() => {
+    return {
+      total: allSensors.length,
+      online: allSensors.filter(s => s.status === 'online').length,
+      warning: allSensors.filter(s => s.status === 'warning').length,
+      offline: allSensors.filter(s => s.status === 'offline').length,
+    };
+  }, [allSensors]);
+
   const filteredSensors = useMemo(() => {
-    return mockSensors.filter(sensor => {
+    return allSensors.filter(sensor => {
       const matchesSearch = sensor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             sensor.structureName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'all' || sensor.status === statusFilter;
@@ -35,7 +42,7 @@ export const Sensors: React.FC = () => {
       
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [searchQuery, statusFilter, typeFilter]);
+  }, [allSensors, searchQuery, statusFilter, typeFilter]);
 
   const tableColumns = [
     { key: 'name', label: 'Sensor Name', render: (item: Sensor) => <span className="font-medium text-t-text">{item.name}</span> },

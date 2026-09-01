@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Wrench, Ruler, Activity, ShieldCheck } from 'lucide-react';
-import { mockStructures, mockSensors, mockInspections } from '../utils/mockData';
+import { structuresApi } from '../api/structures.api';
+import { sensorsApi } from '../api/sensors.api';
+import { apiClient } from '../api/client';
+import { Structure } from '../types/structure.types';
+import { Sensor } from '../types/sensor.types';
+import { Inspection } from '../types/common.types';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { HealthGauge } from '../components/common/HealthGauge';
@@ -11,13 +16,87 @@ import { OrbitControls, Environment, Grid } from '@react-three/drei';
 import BridgeModel from '../components/digital-twin/BridgeModel';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
+import { Modal } from '../components/common/Modal';
+import { toast } from 'sonner';
+
 const InfrastructureDetail: React.FC = () => {
   const { id } = useParams();
-  const structure = mockStructures.find(s => s.id === id) || mockStructures[0];
-  const sensors = mockSensors.filter(s => s.structureId === structure.id);
-  const inspections = mockInspections.filter(i => i.structureId === structure.id);
+  const [structure, setStructure] = useState<Structure | null>(null);
+  const [sensors, setSensors] = useState<Sensor[]>([]);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+
+  useEffect(() => {
+    if (!id) return;
+    structuresApi.getStructure(id)
+      .then(data => setStructure(data))
+      .catch(err => console.error('Failed to load structure:', err));
+    sensorsApi.getSensors({ structureId: id })
+      .then(data => setSensors(data))
+      .catch(err => console.error('Failed to load sensors:', err));
+    apiClient.get<Inspection[]>(`/inspections?structureId=${id}`)
+      .then(data => setInspections(data))
+      .catch(err => console.error('Failed to load inspections:', err));
+  }, [id]);
+
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleType, setScheduleType] = useState('manual');
+  const [isScheduling, setIsScheduling] = useState(false);
+
+  const handleGenerateReport = async () => {
+    if (!structure) return;
+    try {
+      setIsGeneratingReport(true);
+      const blob = await structuresApi.generateReport(structure.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `structure-report-${structure.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Ensure we have toast from sonner. Assuming toast is globally imported or we can just console.log if toast isn't imported.
+      toast.success('Report generated successfully');
+    } catch (err) {
+      console.error('Failed to generate report:', err);
+      toast.error('Failed to generate report');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
+  const handleScheduleInspection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!structure) return;
+    try {
+      setIsScheduling(true);
+      await apiClient.post('/inspections/schedule', {
+        structureId: structure.id,
+        structureName: structure.name,
+        date: new Date(scheduleDate).toISOString(),
+        type: scheduleType,
+      });
+      setIsScheduleModalOpen(false);
+      toast.success('Inspection scheduled successfully');
+      // optionally fetch inspections again
+    } catch (err) {
+      console.error('Failed to schedule:', err);
+      toast.error('Failed to schedule inspection');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
   
   const [activeTab, setActiveTab] = useState('digital-twin');
+
+  if (!structure) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-t-bg text-primary-500">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
   const tabs = [
     { id: 'digital-twin', label: 'Digital Twin' },
@@ -106,10 +185,18 @@ const InfrastructureDetail: React.FC = () => {
                 <HealthGauge score={structure.healthScore} size="lg" showLabel />
               </div>
               <div className="flex gap-3">
-                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors text-sm shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                <button 
+                  onClick={() => setIsScheduleModalOpen(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors text-sm shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                >
                   Schedule Inspection
                 </button>
-                <button className="px-4 py-2 bg-t-hover hover:bg-t-border border border-t-border text-t-text rounded-lg font-medium transition-colors text-sm">
+                <button 
+                  onClick={handleGenerateReport}
+                  disabled={isGeneratingReport}
+                  className="flex items-center gap-2 px-4 py-2 bg-t-hover hover:bg-t-border border border-t-border text-t-text rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                >
+                  {isGeneratingReport ? <div className="w-4 h-4 border-2 border-t-text border-t-transparent rounded-full animate-spin"></div> : null}
                   Generate Report
                 </button>
               </div>
@@ -158,7 +245,9 @@ const InfrastructureDetail: React.FC = () => {
                 
                 <Grid args={[100, 100]} cellColor="#1e293b" sectionColor="#334155" fadeDistance={50} position={[0, -5, 0]} />
                 <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} minDistance={10} maxDistance={40} autoRotate={true} autoRotateSpeed={0.5} />
-                <Environment preset="city" />
+                <Suspense fallback={null}>
+                  <Environment preset="city" />
+                </Suspense>
               </Canvas>
             </Card>
           )}
@@ -254,8 +343,34 @@ const InfrastructureDetail: React.FC = () => {
             </div>
           )}
         </div>
-
       </div>
+
+      <Modal isOpen={isScheduleModalOpen} onClose={() => setIsScheduleModalOpen(false)} title="Schedule Inspection">
+        <form onSubmit={handleScheduleInspection} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-t-muted mb-1">Date</label>
+            <input required type="date" className="w-full bg-t-card border border-t-border rounded-lg p-2 text-t-text"
+                   value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-t-muted mb-1">Inspection Type</label>
+            <select className="w-full bg-t-card border border-t-border rounded-lg p-2 text-t-text"
+                    value={scheduleType} onChange={e => setScheduleType(e.target.value)}>
+              <option value="manual">Manual / Visual</option>
+              <option value="ai">AI / Drone</option>
+            </select>
+          </div>
+          <div className="flex justify-end space-x-3 pt-4">
+            <button type="button" onClick={() => setIsScheduleModalOpen(false)} className="px-4 py-2 bg-t-hover border border-t-border rounded-lg text-t-text hover:bg-t-border transition-colors">
+              Cancel
+            </button>
+            <button type="submit" disabled={isScheduling} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50">
+              {isScheduling ? 'Scheduling...' : 'Schedule'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
     </div>
   );
 };

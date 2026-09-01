@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Building2, MapPin } from 'lucide-react';
-import { mockStructures } from '../utils/mockData';
+import { structuresApi } from '../api/structures.api';
+import { Structure } from '../types/structure.types';
 import { Card } from '../components/common/Card';
 import { HealthGauge } from '../components/common/HealthGauge';
 import { Badge } from '../components/common/Badge';
@@ -9,12 +10,19 @@ import { formatDate } from '../utils/formatters';
 import { Link } from 'react-router-dom';
 
 const Infrastructure: React.FC = () => {
+  const [structures, setStructures] = useState<Structure[]>([]);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('Health Score');
 
-  const filteredStructures = mockStructures.filter(s => {
+  useEffect(() => {
+    structuresApi.getStructures()
+      .then(data => setStructures(data))
+      .catch(err => console.error('Failed to load structures:', err));
+  }, []);
+
+  const filteredStructures = structures.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'All' || s.type.toLowerCase() === typeFilter.toLowerCase();
     const matchesStatus = statusFilter === 'All' || s.status.toLowerCase() === statusFilter.toLowerCase();
@@ -26,9 +34,9 @@ const Infrastructure: React.FC = () => {
     return 0;
   });
 
-  const healthyCount = mockStructures.filter(s => s.status === 'healthy').length;
-  const warningCount = mockStructures.filter(s => s.status === 'warning').length;
-  const criticalCount = mockStructures.filter(s => s.status === 'critical').length;
+  const healthyCount = structures.filter(s => s.status === 'healthy').length;
+  const warningCount = structures.filter(s => s.status === 'warning').length;
+  const criticalCount = structures.filter(s => s.status === 'critical').length;
 
   const getBorderColor = (status: string) => {
     if (status === 'healthy') return 'border-t-green-500';
@@ -90,7 +98,7 @@ const Infrastructure: React.FC = () => {
         {/* Stats Row */}
         <div className="flex items-center gap-4 text-sm">
           <div className="bg-t-hover border border-t-border px-3 py-1.5 rounded-full flex items-center gap-2">
-            <span className="text-t-muted">Total:</span> <span className="font-semibold">{mockStructures.length}</span>
+            <span className="text-t-muted">Total:</span> <span className="font-semibold">{structures.length}</span>
           </div>
           <div className="bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />

@@ -11,6 +11,7 @@ export interface StatCardProps {
   suffix?: string;
   icon: LucideIcon;
   trend?: { value: number; isPositive: boolean };
+  secondaryStat?: React.ReactNode;
   color?: 'blue' | 'green' | 'amber' | 'red' | 'purple';
   sparklineData?: number[];
 }
@@ -24,7 +25,7 @@ const colorMap = {
 };
 
 export const StatCard: React.FC<StatCardProps> = ({
-  title, value, prefix = '', suffix = '', icon: Icon, trend, color = 'blue', sparklineData
+  title, value, prefix = '', suffix = '', icon: Icon, trend, secondaryStat, color = 'blue', sparklineData
 }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -57,11 +58,19 @@ export const StatCard: React.FC<StatCardProps> = ({
               {prefix}{displayValue.toLocaleString()}{suffix}
             </span>
           </div>
-          {trend && (
-            <div className={clsx("flex items-center mt-2 text-sm font-medium", trend.isPositive ? "text-[#22C55E]" : "text-[#EF4444]")}>
-              {trend.isPositive ? <ArrowUpRight className="w-4 h-4 mr-1" /> : <ArrowDownRight className="w-4 h-4 mr-1" />}
-              <span>{Math.abs(trend.value)}%</span>
-              <span className="text-t-muted ml-2 font-normal">vs last week</span>
+          {(trend || secondaryStat) && (
+            <div className="flex items-center mt-2 space-x-3">
+              {trend && (
+                <div className={clsx("flex items-center text-sm font-medium", trend.isPositive ? "text-[#22C55E]" : "text-[#EF4444]")}>
+                  {trend.isPositive ? <ArrowUpRight className="w-4 h-4 mr-1" /> : <ArrowDownRight className="w-4 h-4 mr-1" />}
+                  <span>{Math.abs(trend.value)}%</span>
+                </div>
+              )}
+              {secondaryStat && (
+                <div className="text-sm">
+                  {secondaryStat}
+                </div>
+              )}
             </div>
           )}
         </div>

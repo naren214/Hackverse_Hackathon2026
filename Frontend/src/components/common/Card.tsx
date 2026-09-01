@@ -26,7 +26,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div 
       className={clsx(
-        'bg-t-card/80 backdrop-blur-xl border border-t-border rounded-xl overflow-hidden transition-all duration-300 shadow-card',
+        'bg-t-card/80 backdrop-blur-xl border border-t-border rounded-xl overflow-hidden transition-all duration-300 shadow-card flex flex-col',
         hoverable && 'hover:shadow-glow hover:-translate-y-1',
         className
       )}
@@ -47,7 +47,7 @@ export const Card: React.FC<CardProps> = ({
           {headerAction && <div>{headerAction}</div>}
         </div>
       )}
-      <div className={clsx(!noPadding && 'p-6')}>
+      <div className={clsx('flex-1 min-h-0', !noPadding && 'p-6')}>
         {children}
       </div>
     </div>

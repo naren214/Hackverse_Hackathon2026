@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Brain, Activity } from 'lucide-react';
-import { mockModelMetrics } from '../../utils/mockData';
+import { analyticsApi } from '../../api/analytics.api';
+import { ModelMetrics } from '../../types/analytics.types';
 
 export const ModelPerformance: React.FC = () => {
+  const [metrics, setMetrics] = useState<ModelMetrics[]>([]);
+
+  useEffect(() => {
+    analyticsApi.getModelMetrics()
+      .then(data => setMetrics(data))
+      .catch(err => console.error('Failed to load model metrics:', err));
+  }, []);
   return (
     <div className="bg-t-card border border-t-border rounded-xl p-6">
       <div className="flex items-center space-x-2 mb-6">
@@ -16,7 +24,7 @@ export const ModelPerformance: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {mockModelMetrics.map((model, idx) => (
+        {metrics.map((model, idx) => (
           <div key={idx} className="bg-t-hover border border-t-border rounded-xl p-5 hover:border-indigo-500/30 transition-colors">
             <h3 className="text-t-text font-medium mb-4 truncate">{model.name}</h3>
             
@@ -34,7 +42,7 @@ export const ModelPerformance: React.FC = () => {
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold text-t-text">{model.accuracy}%</span>
+                  <span className="text-2xl font-bold text-t-text">{Number(model.accuracy ?? 0).toFixed(2)}%</span>
                   <span className="text-[10px] text-t-muted uppercase tracking-wider">Accuracy</span>
                 </div>
               </div>
@@ -42,15 +50,15 @@ export const ModelPerformance: React.FC = () => {
 
             <div className="grid grid-cols-3 gap-2 text-center border-t border-t-border pt-4 mb-4">
               <div>
-                <p className="text-lg font-semibold text-t-text">{model.precision}%</p>
+                <p className="text-lg font-semibold text-t-text">{Number(model.precision ?? 0).toFixed(2)}%</p>
                 <p className="text-xs text-t-muted">Precision</p>
               </div>
               <div className="border-x border-t-border">
-                <p className="text-lg font-semibold text-t-text">{model.recall}%</p>
+                <p className="text-lg font-semibold text-t-text">{Number(model.recall ?? 0).toFixed(2)}%</p>
                 <p className="text-xs text-t-muted">Recall</p>
               </div>
               <div>
-                <p className="text-lg font-semibold text-t-text">{model.f1Score}%</p>
+                <p className="text-lg font-semibold text-t-text">{Number(model.f1Score ?? 0).toFixed(2)}%</p>
                 <p className="text-xs text-t-muted">F1 Score</p>
               </div>
             </div>

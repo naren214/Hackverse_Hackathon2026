@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DollarSign } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { mockCostForecasts } from '../../utils/mockData';
+import { analyticsApi } from '../../api/analytics.api';
+import { CostForecast as CostForecastType } from '../../types/analytics.types';
+import { useTimeRange } from '../../context/TimeRangeContext';
 
 export const CostForecast: React.FC = () => {
-  const totalPredicted = mockCostForecasts.reduce((sum, item) => sum + item.predicted, 0);
+  const [forecasts, setForecasts] = useState<CostForecastType[]>([]);
+  const { timeRange } = useTimeRange();
+
+  useEffect(() => {
+    analyticsApi.getCostForecasts(timeRange)
+      .then(data => setForecasts(data))
+      .catch(err => console.error('Failed to load cost forecasts:', err));
+  }, [timeRange]);
+
+  const totalPredicted = forecasts.reduce((sum, item) => sum + item.predicted, 0);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -42,7 +53,7 @@ export const CostForecast: React.FC = () => {
 
       <div className="flex-1 w-full min-h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={mockCostForecasts} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+          <BarChart data={forecasts} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
             <XAxis dataKey="month" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis 
