@@ -43,10 +43,11 @@ const PublicDashboard = React.lazy(() => import('./pages/public/PublicDashboard'
 const PublicStructureDetail = React.lazy(() => import('./pages/public/PublicStructureDetail').then(m => ({ default: m.PublicStructureDetail })));
 
 import { TimeRangeProvider } from './context/TimeRangeContext';
-
+import { CursorEffects } from './components/common/CursorEffects';
 export default function App() {
   return (
     <TimeRangeProvider>
+      <CursorEffects />
       <Toaster theme="dark" position="top-right" />
       <Suspense fallback={<LoadingFallback />}>
         <AnimatePresence mode="wait">
