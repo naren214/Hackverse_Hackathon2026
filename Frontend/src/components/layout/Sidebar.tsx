@@ -112,8 +112,8 @@ export const Sidebar: React.FC = () => {
           </div>
           {!isCollapsed && (
             <div className="ml-3 overflow-hidden">
-              <p className="text-sm font-medium text-t-text truncate">Naren</p>
-              <p className="text-xs text-t-muted truncate">Lead Engineer</p>
+              <p className="text-sm font-medium text-t-text truncate">Government</p>
+              <p className="text-xs text-t-muted truncate">admin@structureai.gov</p>
             </div>
           )}
         </div>

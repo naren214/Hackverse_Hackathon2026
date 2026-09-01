@@ -93,7 +93,7 @@ export const TopBar: React.FC = () => {
             onClick={() => setShowProfile(!showProfile)}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 hover:ring-offset-t-bg transition-all"
           >
-            <span className="text-xs font-bold text-white">NA</span>
+            <span className="text-xs font-bold text-white">GOV</span>
           </button>
 
           <AnimatePresence>
