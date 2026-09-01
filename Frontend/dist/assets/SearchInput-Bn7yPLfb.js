@@ -1,0 +1,6 @@
+import{j as e}from"./index-x0LnCo4S.js";import{c as l}from"./clsx-B-dksMZM.js";import{S as n}from"./search-Di2Yn0TQ.js";import{c}from"./createLucideIcon-CahhIbKj.js";/**
+ * @license lucide-react v0.417.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const p=c("X",[["path",{d:"M18 6 6 18",key:"1bl5f8"}],["path",{d:"m6 6 12 12",key:"d8bk6v"}]]),d=({value:t,onChange:s,placeholder:r="Search...",className:o,onKeyDown:i})=>e.jsxs("div",{className:l("relative w-full group",o),children:[e.jsx("div",{className:"absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none",children:e.jsx(n,{className:"w-4 h-4 text-[#94A3B8] group-focus-within:text-[#3B82F6] transition-colors"})}),e.jsx("input",{type:"text",value:t,onChange:a=>s(a.target.value),onKeyDown:i,placeholder:r,className:"w-full pl-10 pr-10 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-all"}),t&&e.jsx("button",{onClick:()=>s(""),className:"absolute inset-y-0 right-0 flex items-center pr-3 text-[#94A3B8] hover:text-white",children:e.jsx(p,{className:"w-4 h-4"})})]});export{d as S,p as X};
