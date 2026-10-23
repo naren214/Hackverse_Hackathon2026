@@ -37,7 +37,7 @@ export const login = async (req, res, next) => {
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, role, department } = req.body;
+    const { name, email, password, department } = req.body;
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
@@ -48,7 +48,7 @@ export const register = async (req, res, next) => {
       name,
       email: email.toLowerCase(),
       password,
-      role: role || 'viewer',
+      role: 'viewer',
       department: department || '',
       avatar: `https://i.pravatar.cc/150?u=${email}`
     });
