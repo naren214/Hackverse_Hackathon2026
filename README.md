@@ -1,6 +1,6 @@
 # StructureAI
 
-**StructureAI** is an advanced, AI-powered Structural Health Monitoring (SHM) and Predictive Maintenance platform. It provides governments and infrastructure authorities with real-time analytics, 3D digital twins, live map telemetry, and predictive alerts to ensure the safety and longevity of critical infrastructure like bridges, flyovers, and public buildings.
+**StructureAI** is a Hackverse prototype for exploring structural health monitoring and maintenance workflows with a dashboard, 3D visualizations, maps, and alerts. The seeded sensor readings and forecasts are simulated.
 
 ## 🚀 Features
 - **Real-Time Sensor Monitoring:** Live tracking of vibration, strain, temperature, and corrosion.
@@ -18,7 +18,7 @@
 ## 🛠️ Local Setup
 
 ### Prerequisites
-- Node.js (v18+)
+- Node.js (v22+)
 - MongoDB (Local instance or MongoDB Atlas cluster)
 
 ### 1. Clone the Repository
@@ -30,7 +30,7 @@ cd Hackverse_Hackathon2026
 ### 2. Backend Setup
 ```bash
 cd Backend
-npm install
+npm ci
 ```
 - Create a `.env` file in the `Backend` directory:
 ```env
@@ -39,7 +39,7 @@ MONGODB_URI=mongodb://localhost:27017/structureai
 CLIENT_URL=http://localhost:5173
 JWT_SECRET=your_jwt_secret_key
 ```
-- **Seed the Database** with real-world infrastructure data (Required for first run):
+- **Seed a dedicated demo database** with sample structures and simulated readings. This command replaces existing records in the configured database.
 ```bash
 npm run seed
 ```
@@ -52,7 +52,7 @@ npm run dev
 Open a new terminal window:
 ```bash
 cd Frontend
-npm install
+npm ci
 ```
 - Start the Vite development server:
 ```bash
@@ -61,12 +61,13 @@ npm run dev
 
 ### 4. Access the Application
 - **Main Dashboard:** [http://localhost:5173](http://localhost:5173)
-- **Default Credentials:**
+- **Local seeded demo account:**
   - Email: `demo@structureai.com`
   - Password: `demo1234`
 - **Public Portal:** Available directly from the login screen via the "Public Portal" button.
 
 ## 🌐 Deployment
+- Configure a separate database and strong credentials for any shared deployment. The local seed creates an admin with a published demo password.
 - **Frontend:** Designed to be deployed on [Vercel](https://vercel.com).
 - **Backend:** Designed to be deployed on [Render](https://render.com) or Railway (requires WebSocket support).
 
